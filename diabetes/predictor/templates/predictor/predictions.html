@@ -1,0 +1,50 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Predictions</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/predictions_styles.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">ADIUTOR</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'patients' %}">Patients</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'eda' %}">EDA-analysis</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'prediction' %}">Predictions</a></li>
+
+            </ul>
+        </div>
+        <span class="navbar-text">
+            Hello, {{ user.username }}
+            <a class="nav-link d-inline" href="{% url 'logout' %}">Logout</a>
+        </span>
+    </nav>
+    <div class="container mt-5">
+        <h2>Diabetes Prediction</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Predict</button>
+        </form>
+    </div>
+    {% if patient %}
+    <div class="container mt-5">
+        <h2>Prediction Result</h2>
+        <p>Patient: {{ patient.first_name }} {{ patient.last_name }}</p>
+        <p>Diabetes Prediction: {% if is_diabetic %}Positive{% else %}Negative{% endif %}</p>
+    </div>
+    {% endif %}
+    <footer class="footer bg-light text-center py-3 mt-5">
+        <p>© 2024 Your Medical App. All rights reserved.</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

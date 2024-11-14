@@ -1,0 +1,44 @@
+/* eda_styles.css */
+/* eda_styles.css */
+body {
+    font-family: 'Arial
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.text-center {
+    text-align: center;
+}
+
+#plots {
+    margin-top: 20px;
+}
+
+.table {
+    margin-top: 20px;
+}
+
+.collapse {
+    margin-top: 20px;
+}
+
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}

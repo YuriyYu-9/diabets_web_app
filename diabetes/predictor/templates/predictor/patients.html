@@ -1,0 +1,139 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patients</title>
+    <link rel="stylesheet" href="{% static 'css/patients.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">ADIUTOR</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'eda' %}">EDA</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'patients' %}">Patients</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'prediction' %}">Predictions</a></li>
+        </ul>
+        <span class="navbar-text">
+            Hello, {{ user.username }}
+            <a class="nav-link d-inline" href="{% url 'logout' %}">Logout</a>
+        </span>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>Patients</h2>
+    <button class="btn btn-primary mb-3" onclick="toggleForm()">Add Patient</button>
+    <div id="patient-form-container" style="display: none;">
+        <form id="patient-form" method="post" action="{% url 'add_patient' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cancel</button>
+        </form>
+    </div>
+    <div id="patients-list">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Pregnancies</th>
+                    <th>Glucose</th>
+                    <th>Blood Pressure</th>
+                    <th>Skin Thickness</th>
+                    <th>Insulin</th>
+                    <th>BMI</th>
+                    <th>Diabetes Pedigree Function</th>
+                    <th>Age</th>
+                    <th>Outcome</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.first_name }}</td>
+                    <td>{{ patient.last_name }}</td>
+                    <td>{{ patient.pregnancies }}</td>
+                    <td>{{ patient.glucose }}</td>
+                    <td>{{ patient.blood_pressure }}</td>
+                    <td>{{ patient.skin_thickness }}</td>
+                    <td>{{ patient.insulin }}</td>
+                    <td>{{ patient.bmi }}</td>
+                    <td>{{ patient.diabetes_pedigree_function }}</td>
+                    <td>{{ patient.age }}</td>
+                    <td>{{ patient.outcome }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editPatient({{ patient.id }})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePatient({{ patient.id }})">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function toggleForm() {
+    const formContainer = document.getElementById('patient-form-container');
+    formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+}
+
+function editPatient(patientId) {
+    fetch(`/predictor/patients/${patientId}/edit/`)
+        .then(response => response.json())
+        .then(data => {
+            const form = document.getElementById('patient-form');
+            form.action = `/predictor/patients/${patientId}/update/`;
+            form.innerHTML = data.form + '<button type="submit" class="btn btn-success">Save</button><button type="button" class="btn btn-secondary" onclick="toggleForm()">Cancel</button>';
+            document.getElementById('patient-form-container').style.display = 'block';
+        });
+}
+
+function deletePatient(patientId) {
+    if (confirm('Are you sure you want to delete this patient?')) {
+        fetch(`/predictor/patients/${patientId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error deleting patient');
+            }
+        });
+    }
+}
+
+document.getElementById('patient-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const form = event.target;
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: new FormData(form)
+    }).then(response => {
+        if (response.ok) {
+            window.location.reload();
+            alert('Data Base Update Success');
+        } else {
+            alert('Error saving patient');
+        }
+    });
+});
+</script>
+</body>
+</html>

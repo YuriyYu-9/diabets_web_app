@@ -1,0 +1,285 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EDA Analysis</title>
+    <link rel="stylesheet" href="{% static 'css/eda_styles.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">ADIUTOR</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'patients' %}">Patients</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'eda' %}">EDA-analysis</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'prediction' %}">Predictions</a></li>
+
+            </ul>
+        </div>
+        <span class="navbar-text">
+            Hello, {{ user.username }}
+            <a class="nav-link d-inline" href="{% url 'logout' %}">Logout</a>
+        </span>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center">Exploratory Data Analysis</h2>
+        <button class="btn btn-info mb-3" data-toggle="collapse" data-target="#dataset">Показать/Скрыть Dataset</button>
+
+        <div class="form-group">
+            <label for="rowsSelect">Выберите количество строк для отображения:</label>
+            <select class="form-control" id="rowsSelect" onchange="updateDataset()">
+                <option value="10">10</option>
+                <option value="100">100</option>
+                <option value="300">300</option>
+                <option value="all">Все</option>
+            </select>
+        </div>
+
+        <div id="dataset" class="collapse table-responsive">
+            <h3>Dataset Preview</h3>
+            <div id="dataset-table" style="max-height: 400px; overflow-y: auto;">{{ data|safe }}</div>
+        </div>
+
+        <h3 class="mt-5">Correlation Matrix</h3>
+        <div>{{ correlation_matrix|safe }}</div>
+
+        <div class="form-group mt-4">
+            <label for="param1Select">Выберите первый параметр:</label>
+            <select class="form-control" id="param1Select">
+                <option value="Pregnancies">Pregnancies</option>
+                <option value="Glucose">Glucose</option>
+                <option value="BloodPressure">BloodPressure</option>
+                <option value="SkinThickness">SkinThickness</option>
+                <option value="Insulin">Insulin</option>
+                <option value="BMI">BMI</option>
+                <option value="DiabetesPedigreeFunction">DiabetesPedigreeFunction</option>
+                <option value="Age">Age</option>
+                <option value="Outcome">Outcome</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="param2Select">Выберите второй параметр:</label>
+            <select class="form-control" id="param2Select">
+                <option value="Pregnancies">Pregnancies</option>
+                <option value="Glucose">Glucose</option>
+                <option value="BloodPressure">BloodPressure</option>
+                <option value="SkinThickness">SkinThickness</option>
+                <option value="Insulin">Insulin</option>
+                <option value="BMI">BMI</option>
+                <option value="DiabetesPedigreeFunction">DiabetesPedigreeFunction</option>
+                <option value="Age">Age</option>
+                <option value="Outcome">Outcome</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <input type="checkbox" id="regressionLine" checked>
+            <label for="regressionLine">Показать линию регрессии</label>
+        </div>
+
+        <button class="btn btn-primary mt-2" onclick="updatePlot()">Обновить график</button>
+
+        <div id="plots" class="mt-5"></div>
+
+        <h3 class="mt-5">Дополнительные графики</h3>
+
+        <div class="form-group mt-4">
+            <label for="histogramParamSelect">Выберите параметр для гистограммы (оставьте пустым для всех):</label>
+            <select class="form-control" id="histogramParamSelect">
+                <option value="">Все</option>
+                <option value="Pregnancies">Pregnancies</option>
+                <option value="Glucose">Glucose</option>
+                <option value="BloodPressure">BloodPressure</option>
+                <option value="SkinThickness">SkinThickness</option>
+                <option value="Insulin">Insulin</option>
+                <option value="BMI">BMI</option>
+                <option value="DiabetesPedigreeFunction">DiabetesPedigreeFunction</option>
+                <option value="Age">Age</option>
+                <option value="Outcome">Outcome</option>
+            </select>
+        </div>
+        <button class="btn btn-primary mt-2" onclick="updateHistograms()">Показать гистограммы</button>
+        <div id="histograms" class="mt-5"></div>
+
+        <div class="form-group mt-4">
+            <label for="boxplotParamSelect">Выберите параметр для Box Plot (оставьте пустым для всех):</label>
+            <select class="form-control" id="boxplotParamSelect">
+                <option value="">Все</option>
+                <option value="Pregnancies">Pregnancies</option>
+                <option value="Glucose">Glucose</option>
+                <option value="BloodPressure">BloodPressure</option>
+                <option value="SkinThickness">SkinThickness</option>
+                <option value="Insulin">Insulin</option>
+                <option value="BMI">BMI</option>
+                <option value="DiabetesPedigreeFunction">DiabetesPedigreeFunction</option>
+                <option value="Age">Age</option>
+                <option value="Outcome">Outcome</option>
+            </select>
+        </div>
+        <button class="btn btn-primary mt-2" onclick="updateBoxPlots()">Показать Box Plots</button>
+        <div id="boxplots" class="mt-5"></div>
+
+        <div class="form-group mt-4">
+            <label for="pairplotParam1Select">Выберите первый параметр для Pair Plot (оставьте пустым для всех):</label>
+            <select class="form-control" id="pairplotParam1Select">
+                <option value="">Все</option>
+                <option value="Pregnancies">Pregnancies</option>
+                <option value="Glucose">Glucose</option>
+                <option value="BloodPressure">BloodPressure</option>
+                <option value="SkinThickness">SkinThickness</option>
+                <option value="Insulin">Insulin</option>
+                <option value="BMI">BMI</option>
+                <option value="DiabetesPedigreeFunction">DiabetesPedigreeFunction</option>
+                <option value="Age">Age</option>
+                <option value="Outcome">Outcome</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="pairplotParam2Select">Выберите второй параметр для Pair Plot (оставьте пустым для всех):</label>
+            <select class="form-control" id="pairplotParam2Select">
+                <option value="">Все</option>
+                <option value="Pregnancies">Pregnancies</option>
+                <option value="Glucose">Glucose</option>
+                <option value="BloodPressure">BloodPressure</option>
+                <option value="SkinThickness">SkinThickness</option>
+                <option value="Insulin">Insulin</option>
+                <option value="BMI">BMI</option>
+                <option value="DiabetesPedigreeFunction">DiabetesPedigreeFunction</option>
+                <option value="Age">Age</option>
+                <option value="Outcome">Outcome</option>
+            </select>
+        </div>
+        <button class="btn btn-primary mt-2" onclick="updatePairPlots()">Показать Pair Plots</button>
+        <div id="pairplots" class="mt-5"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script>
+        Plotly.newPlot('plots', []);
+
+        function updatePlot() {
+            var param1 = document.getElementById('param1Select').value;
+            var param2 = document.getElementById('param2Select').value;
+            var showRegressionLine = document.getElementById('regressionLine').checked;
+
+            $.ajax({
+                url: "{% url 'eda_plot' %}",
+                data: {
+                    param1: param1,
+                    param2: param2,
+                    regression_line: showRegressionLine
+                },
+                success: function(response) {
+                    var traces = [{
+                        x: response.x,
+                        y: response.y,
+                        mode: 'markers',
+                        type: 'scatter',
+                        name: 'Data points'
+                    }];
+
+                    if (showRegressionLine) {
+                        traces.push({
+                            x: response.regression_x,
+                            y: response.regression_y,
+                            mode: 'lines',
+                            type: 'scatter',
+                            name: 'Regression line'
+                        });
+                    }
+
+                    Plotly.newPlot('plots', traces);
+                }
+            });
+        }
+
+        function updateDataset() {
+            var rows = document.getElementById('rowsSelect').value;
+            $.ajax({
+                url: "{% url 'eda_data' %}",
+                data: {
+                    rows: rows
+                },
+                success: function(response) {
+                    $('#dataset-table').html(response.data);
+                }
+            });
+        }
+
+        function updateHistograms() {
+            var param = document.getElementById('histogramParamSelect').value;
+            $.ajax({
+                url: "{% url 'eda_histograms' %}",
+                data: {
+                    param: param
+                },
+                success: function(response) {
+                    var data = response.histograms.map(function(histogram) {
+                        return {
+                            x: histogram.x,
+                            type: 'histogram',
+                            name: histogram.name
+                        };
+                    });
+                    Plotly.newPlot('histograms', data);
+                }
+            });
+        }
+
+        function updateBoxPlots() {
+            var param = document.getElementById('boxplotParamSelect').value;
+            $.ajax({
+                url: "{% url 'eda_boxplots' %}",
+                data: {
+                    param: param
+                },
+                success: function(response) {
+                    var data = response.boxplots.map(function(boxplot) {
+                        return {
+                            y: boxplot.y,
+                            type: 'box',
+                            name: boxplot.name
+                        };
+                    });
+                    Plotly.newPlot('boxplots', data);
+                }
+            });
+        }
+
+        function updatePairPlots() {
+            var param1 = document.getElementById('pairplotParam1Select').value;
+            var param2 = document.getElementById('pairplotParam2Select').value;
+
+            $.ajax({
+                url: "{% url 'eda_pairplots' %}",
+                data: {
+                    param1: param1,
+                    param2: param2
+                },
+                success: function(response) {
+                    var data = response.pairplots.map(function(pairplot) {
+                        return {
+                            x: pairplot.x,
+                            y: pairplot.y,
+                            mode: 'markers',
+                            type: 'scatter',
+                            name: pairplot.name
+                        };
+                    });
+                    Plotly.newPlot('pairplots', data);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
